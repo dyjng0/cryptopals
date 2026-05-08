@@ -1,3 +1,4 @@
+#include <bit>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -96,15 +97,15 @@ std::vector<uint8_t> stringToBytes(const std::string &str) {
 
 std::optional<std::vector<uint8_t>> fixedXOR(const std::vector<uint8_t> &buf1,
                                              const std::vector<uint8_t> &buf2) {
-  if (buf1.size() == buf2.size()) {
-    std::vector<uint8_t> output;
-    output.reserve(buf1.size());
-    for (size_t i = 0; i < buf1.size(); i++) {
-      output.push_back(buf1[i] ^ buf2[i]);
-    }
-    return output;
+  if (buf1.size() != buf2.size()) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  std::vector<uint8_t> output;
+  output.reserve(buf1.size());
+  for (size_t i = 0; i < buf1.size(); i++) {
+    output.push_back(buf1[i] ^ buf2[i]);
+  }
+  return output;
 }
 
 std::vector<uint8_t> singleByteXOR(const std::vector<uint8_t> &buffer,
@@ -128,4 +129,17 @@ std::vector<uint8_t> repeatingKeyXOR(const std::vector<uint8_t> &buffer,
     output.push_back(buffer[i] ^ key[i % keyLen]);
   }
   return output;
+}
+
+std::optional<int> findHammingDist(const std::vector<uint8_t> &buffer1,
+                                   const std::vector<uint8_t> &buffer2) {
+  if (buffer1.size() != buffer2.size()) {
+    return std::nullopt;
+  }
+
+  int dist = 0;
+  for (size_t i = 0; i < buffer1.size(); i++) {
+    dist += std::popcount(static_cast<uint8_t>(buffer1[i] ^ buffer2[i]));
+  }
+  return dist;
 }
