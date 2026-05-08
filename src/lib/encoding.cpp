@@ -17,8 +17,27 @@ std::optional<uint8_t> toHex(char c) {
     return 10 + (c - 'a');
   } else if (c >= 'A' && c <= 'F') {
     return 10 + (c - 'A');
+  } else {
+    return std::nullopt;
   }
-  return std::nullopt;
+}
+
+std::optional<uint8_t> fromBase64(char c) {
+  if (c >= 'A' && c <= 'Z') {
+    return c - 'A';
+  } else if (c >= 'a' && c <= 'z') {
+    return c - 'a' + 26;
+  } else if (c >= '0' && c <= '9') {
+    return c - '0' + 52;
+  } else if (c == '+') {
+    return 62;
+  } else if (c == '/') {
+    return 63;
+  } else if (c == '=') {
+    return 0;
+  } else {
+    return std::nullopt;
+  }
 }
 
 std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex) {
@@ -59,7 +78,7 @@ std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
   std::string output;
   output.reserve(((len + 2) / 3) * 4);
   size_t i = 0;
-  for (; i + 2 < len; i += 3) {
+  for (; i + 3 <= len; i += 3) {
     uint32_t bitstream = (static_cast<uint32_t>(bytes[i]) << 16) |
                          (static_cast<uint32_t>(bytes[i + 1]) << 8) |
                          (static_cast<uint32_t>(bytes[i + 2]));
@@ -85,6 +104,47 @@ std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
     output.push_back('=');
   }
   return output;
+}
+
+std::optional<std::vector<uint8_t>> base64ToBytes(const std::string &base64) {
+  if (base64.empty() || base64.size() % 4 != 0) {
+    return std::nullopt;
+  }
+
+  std::vector<uint8_t> bytes;
+  const size_t len = base64.size();
+  size_t padding = 0;
+  if (len >= 2) {
+    if (base64[len - 1] == '=')
+      padding++;
+    if (base64[len - 2] == '=')
+      padding++;
+  }
+  bytes.reserve((len / 4) * 3 - padding);
+
+  for (size_t i = 0; i < len; i += 4) {
+    auto c1 = fromBase64(base64[i]);
+    auto c2 = fromBase64(base64[i + 1]);
+    auto c3 = fromBase64(base64[i + 2]);
+    auto c4 = fromBase64(base64[i + 3]);
+    if (!c1 || !c2 || !c3 || !c4) {
+      return std::nullopt;
+    }
+
+    uint32_t bitstream =
+        (static_cast<uint32_t>(*c1) << 18) | (static_cast<uint32_t>(*c2) << 12);
+    bytes.push_back(static_cast<uint8_t>(bitstream >> 16));
+
+    if (base64[i + 2] != '=') {
+      bitstream |= (static_cast<uint32_t>(*c3) << 6);
+      bytes.push_back(static_cast<uint8_t>((bitstream >> 8) & 0xff));
+      if (base64[i + 3] != '=') {
+        bitstream |= static_cast<uint32_t>(*c4);
+        bytes.push_back(static_cast<uint8_t>(bitstream & 0xff));
+      }
+    }
+  }
+  return bytes;
 }
 
 std::string bytesToString(const std::vector<uint8_t> &bytes) {
