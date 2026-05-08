@@ -1,0 +1,131 @@
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "src/lib/encoding.hpp"
+
+const std::string BASE64_TABLE =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const std::string HEX_TABLE = "0123456789abcdef";
+
+std::optional<uint8_t> toHex(char c) {
+  if (c >= '0' && c <= '9') {
+    return c - '0';
+  } else if (c >= 'a' && c <= 'f') {
+    return 10 + (c - 'a');
+  } else if (c >= 'A' && c <= 'F') {
+    return 10 + (c - 'A');
+  }
+  return std::nullopt;
+}
+
+std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex) {
+  const int len = hex.length();
+  if (len % 2 != 0) {
+    return std::nullopt;
+  }
+  std::vector<uint8_t> bytes;
+  bytes.reserve(len / 2);
+
+  for (int i = 0; i < len; i += 2) {
+    auto high_opt = toHex(hex[i]);
+    auto low_opt = toHex(hex[i + 1]);
+
+    if (!high_opt || !low_opt) {
+      return std::nullopt;
+    }
+    uint8_t byteValue = (*high_opt << 4) | *low_opt;
+    bytes.push_back(byteValue);
+  }
+  return bytes;
+}
+
+std::string bytesToHex(const std::vector<uint8_t> &bytes) {
+  const size_t len = bytes.size();
+  std::string output;
+  output.reserve(2 * len);
+
+  for (size_t i = 0; i < len; i++) {
+    output.push_back(HEX_TABLE[bytes[i] >> 4]);
+    output.push_back(HEX_TABLE[bytes[i] & 0x0f]);
+  }
+  return output;
+}
+
+std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
+  const size_t len = bytes.size();
+  std::string output;
+  output.reserve(((len + 2) / 3) * 4);
+  size_t i = 0;
+  for (; i + 2 < len; i += 3) {
+    uint32_t bitstream = (static_cast<uint32_t>(bytes[i]) << 16) |
+                         (static_cast<uint32_t>(bytes[i + 1]) << 8) |
+                         (static_cast<uint32_t>(bytes[i + 2]));
+    output.push_back(BASE64_TABLE[(bitstream >> 18) & 0x3f]);
+    output.push_back(BASE64_TABLE[(bitstream >> 12) & 0x3f]);
+    output.push_back(BASE64_TABLE[(bitstream >> 6) & 0x3f]);
+    output.push_back(BASE64_TABLE[bitstream & 0x3f]);
+  }
+
+  size_t paddingCase = len - i;
+  if (paddingCase == 1) {
+    uint32_t bitstream = static_cast<uint32_t>(bytes[i]) << 16;
+    output.push_back(BASE64_TABLE[(bitstream >> 18) & 0x3f]);
+    output.push_back(BASE64_TABLE[(bitstream >> 12) & 0x3f]);
+    output.push_back('=');
+    output.push_back('=');
+  } else if (paddingCase == 2) {
+    uint32_t bitstream = (static_cast<uint32_t>(bytes[i]) << 16) |
+                         (static_cast<uint32_t>(bytes[i + 1]) << 8);
+    output.push_back(BASE64_TABLE[(bitstream >> 18) & 0x3f]);
+    output.push_back(BASE64_TABLE[(bitstream >> 12) & 0x3f]);
+    output.push_back(BASE64_TABLE[(bitstream >> 6) & 0x3f]);
+    output.push_back('=');
+  }
+  return output;
+}
+
+std::string bytesToString(const std::vector<uint8_t> &bytes) {
+  return std::string(bytes.begin(), bytes.end());
+}
+
+std::vector<uint8_t> stringToBytes(const std::string &str) {
+  return std::vector<uint8_t>(str.begin(), str.end());
+}
+
+std::optional<std::vector<uint8_t>> fixedXOR(const std::vector<uint8_t> &buf1,
+                                             const std::vector<uint8_t> &buf2) {
+  if (buf1.size() == buf2.size()) {
+    std::vector<uint8_t> output;
+    output.reserve(buf1.size());
+    for (size_t i = 0; i < buf1.size(); i++) {
+      output.push_back(buf1[i] ^ buf2[i]);
+    }
+    return output;
+  }
+  return std::nullopt;
+}
+
+std::vector<uint8_t> singleByteXOR(const std::vector<uint8_t> &buffer,
+                                   uint8_t key) {
+  const size_t len = buffer.size();
+  std::vector<uint8_t> output;
+  output.reserve(len);
+  for (size_t i = 0; i < len; i++) {
+    output.push_back(key ^ buffer[i]);
+  }
+  return output;
+}
+
+std::vector<uint8_t> repeatingKeyXOR(const std::vector<uint8_t> &buffer,
+                                     const std::vector<uint8_t> &key) {
+  const size_t bufferLen = buffer.size();
+  const size_t keyLen = key.size();
+  std::vector<uint8_t> output;
+  output.reserve(bufferLen);
+  for (size_t i = 0; i < bufferLen; i++) {
+    output.push_back(buffer[i] ^ key[i % keyLen]);
+  }
+  return output;
+}
