@@ -38,6 +38,7 @@
 *.exe
 *.out
 *.app
+cryptopals
 
 # Build directories
 build/
