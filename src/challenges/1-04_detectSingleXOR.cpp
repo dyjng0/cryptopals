@@ -9,8 +9,7 @@
 #include "src/lib/english.hpp"
 
 int challenge1_04(int argc, char **argv) {
-  std::string fileText;
-  std::string fileName;
+  std::string fileName, fileText;
 
   if (argc == 1) {
     fileName = "resources/1-04.txt";
