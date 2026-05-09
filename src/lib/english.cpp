@@ -1,12 +1,9 @@
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <vector>
 
 #include "src/lib/english.hpp"
-#include "src/lib/util.hpp"
-#include "src/lib/xor.hpp"
 
 static constexpr int LETTER_FREQUENCY[26] = {
     855, 160, 316, 387, 1210, 218, 209, 496, 733, 22,  81, 421, 253,
@@ -34,55 +31,4 @@ int letterFrequencyScore(const std::vector<uint8_t> &bytes) {
     }
   }
   return score;
-}
-
-// single-byte XOR
-MaxScoreResults testXORKeys(const std::vector<uint8_t> &bytes) {
-  int maxScore = -1;
-  uint8_t bestKey = 0;
-  std::vector<uint8_t> maxScoreXOR;
-  for (int keyIndex = 0; keyIndex < 256; keyIndex++) {
-    uint8_t key = static_cast<uint8_t>(keyIndex);
-    std::vector<uint8_t> xorResult = singleByteXOR(bytes, key);
-    int score = letterFrequencyScore(xorResult);
-    if (score > maxScore) {
-      maxScore = score;
-      bestKey = key;
-      maxScoreXOR = xorResult;
-    }
-  }
-  return {maxScore, bestKey, maxScoreXOR};
-}
-
-// Vigenere's Cipher
-int findKeySize(const std::vector<uint8_t> &buffer) {
-  double smallestDist = std::max((int)(buffer.size() / 2), 40) * 8;
-  int keySize = 0;
-  for (size_t i = 2; i < buffer.size() / 2 && i < 40; i++) {
-    auto dist = avgHammingDist(buffer, i);
-    if (dist) {
-      double normalizedDist = *dist / i;
-      if (normalizedDist < smallestDist) {
-        smallestDist = normalizedDist;
-        keySize = i;
-      }
-    }
-  }
-  return keySize;
-}
-
-std::vector<uint8_t> decryptVigenere(const std::vector<uint8_t> &buffer,
-                                     int keySize) {
-  std::vector<uint8_t> key;
-  key.reserve(keySize);
-  int blocks = buffer.size() / keySize;
-  for (int i = 0; i < keySize; i++) {
-    std::vector<uint8_t> transposeBlock;
-    for (int blockNum = 0; blockNum < blocks; blockNum++) {
-      transposeBlock.push_back(buffer[blockNum * keySize + i]);
-    }
-    auto [maxScore, bestKey, maxScoreXOR] = testXORKeys(transposeBlock);
-    key.push_back(bestKey);
-  }
-  return key;
 }

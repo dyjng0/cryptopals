@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "src/challenges/challenges.hpp"
+#include "src/lib/cryptanalysis.hpp"
 #include "src/lib/encoding.hpp"
-#include "src/lib/english.hpp"
 
 int challenge1_03(int argc, char *argv[]) {
   std::string input;
@@ -22,7 +22,7 @@ int challenge1_03(int argc, char *argv[]) {
     std::cerr << "Error: invalid hex string.\n";
     return 1;
   }
-  auto [maxScore, bestKey, maxScoreXOR] = testXORKeys(*bytes);
+  auto [maxScore, bestKey, maxScoreXOR] = breakSingleByteXOR(*bytes);
   std::string result = bytesToString(maxScoreXOR);
   std::cout << result << '\n';
   return 0;

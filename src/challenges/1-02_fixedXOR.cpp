@@ -2,6 +2,7 @@
 
 #include "src/challenges/challenges.hpp"
 #include "src/lib/encoding.hpp"
+#include "src/lib/utils.hpp"
 
 int challenge1_02(int argc, char *argv[]) {
   std::string buf1, buf2;

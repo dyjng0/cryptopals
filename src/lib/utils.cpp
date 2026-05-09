@@ -1,9 +1,11 @@
+#include <bit>
 #include <cstdint>
 #include <optional>
 #include <vector>
 
-#include "src/lib/xor.hpp"
+#include "src/lib/utils.hpp"
 
+// XOR
 std::optional<std::vector<uint8_t>> fixedXOR(const std::vector<uint8_t> &buf1,
                                              const std::vector<uint8_t> &buf2) {
   if (buf1.size() != buf2.size()) {
@@ -38,4 +40,18 @@ std::vector<uint8_t> repeatingKeyXOR(const std::vector<uint8_t> &buffer,
     output.push_back(buffer[i] ^ key[i % keyLen]);
   }
   return output;
+}
+
+// Hamming Distance
+std::optional<int> findHammingDist(const std::vector<uint8_t> &buffer1,
+                                   const std::vector<uint8_t> &buffer2) {
+  if (buffer1.size() != buffer2.size()) {
+    return std::nullopt;
+  }
+
+  int dist = 0;
+  for (size_t i = 0; i < buffer1.size(); i++) {
+    dist += std::popcount(static_cast<uint8_t>(buffer1[i] ^ buffer2[i]));
+  }
+  return dist;
 }

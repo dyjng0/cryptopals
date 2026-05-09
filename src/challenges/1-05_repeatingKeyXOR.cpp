@@ -5,6 +5,7 @@
 
 #include "src/challenges/challenges.hpp"
 #include "src/lib/encoding.hpp"
+#include "src/lib/utils.hpp"
 
 int challenge1_05(int argc, char **argv) {
   std::string plaintext;

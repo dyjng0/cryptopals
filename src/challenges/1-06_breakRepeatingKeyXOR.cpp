@@ -3,8 +3,8 @@
 #include <string>
 
 #include "src/challenges/challenges.hpp"
+#include "src/lib/cryptanalysis.hpp"
 #include "src/lib/encoding.hpp"
-#include "src/lib/english.hpp"
 
 int challenge1_06(int argc, char **argv) {
   std::string input;
@@ -29,7 +29,7 @@ int challenge1_06(int argc, char **argv) {
     return 1;
   }
   int keySize = findKeySize(*bytes);
-  std::vector<uint8_t> decrypted = decryptVigenere(*bytes, keySize);
+  std::vector<uint8_t> decrypted = breakVigenere(*bytes, keySize);
   std::string decryptedString = bytesToString(decrypted);
   std::cout << decryptedString << '\n';
   return 0;
