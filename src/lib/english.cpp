@@ -4,8 +4,9 @@
 #include <optional>
 #include <vector>
 
-#include "src/lib/encoding.hpp"
 #include "src/lib/english.hpp"
+#include "src/lib/util.hpp"
+#include "src/lib/xor.hpp"
 
 static constexpr int LETTER_FREQUENCY[26] = {
     855, 160, 316, 387, 1210, 218, 209, 496, 733, 22,  81, 421, 253,
