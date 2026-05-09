@@ -7,24 +7,23 @@
 #include "src/lib/english.hpp"
 
 int challenge1_06(int argc, char **argv) {
-  std::string fileName, fileText;
-
+  std::string input;
   if (argc == 1) {
+    std::string fileName, fileText;
     fileName = "resources/1-06.txt";
+    std::string fullText = "";
+    std::ifstream readFile(fileName);
+    while (getline(readFile, fileText)) {
+      fullText += fileText;
+    }
   } else if (argc == 2) {
-    fileName = argv[1];
+    input = argv[1];
   } else {
-    std::cerr << "Usage ./cryptopals 1-06 OR ./cryptopals 1-06 <fileName>\n";
+    std::cerr << "Usage ./cryptopals 1-06 OR ./cryptopals 1-06 <base64>\n";
     return 1;
   }
 
-  std::string fullText = "";
-  std::ifstream readFile(fileName);
-  while (getline(readFile, fileText)) {
-    fullText += fileText;
-  }
-
-  auto bytes = base64ToBytes(fullText);
+  auto bytes = base64ToBytes(input);
   if (!bytes) {
     std::cerr << "Error: invalid base64.\n";
     return 1;

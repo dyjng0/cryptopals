@@ -16,7 +16,7 @@ int challenge1_04(int argc, char **argv) {
   } else if (argc == 2) {
     fileName = argv[1];
   } else {
-    std::cerr << "Usage ./cryptopals 1-04 OR ./cryptopals 1-04 <fileName>\n";
+    std::cerr << "Usage ./cryptopals 1-04 OR ./cryptopals 1-04 <filename>\n";
     return 1;
   }
 
