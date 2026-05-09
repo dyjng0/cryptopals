@@ -26,3 +26,5 @@ std::vector<uint8_t> repeatingKeyXOR(const std::vector<uint8_t> &buffer,
 // misc
 std::optional<int> findHammingDist(const std::vector<uint8_t> &buffer1,
                                    const std::vector<uint8_t> &buffer2);
+std::optional<double> avgHammingDist(const std::vector<uint8_t> &buffer,
+                                     int keySize);

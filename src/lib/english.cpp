@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -49,4 +50,21 @@ MaxScoreResults testKeys(const std::vector<uint8_t> &bytes) {
     }
   }
   return {maxScore, bestKey, maxScoreXOR};
+}
+
+// Vigenere's Cipher
+int findKeySize(const std::vector<uint8_t> &buffer) {
+  double smallestDist = std::max((int)(buffer.size() / 2), 40) * 8;
+  int keySize = 0;
+  for (size_t i = 2; i < buffer.size() / 2 && i < 40; i++) {
+    auto dist = avgHammingDist(buffer, i);
+    if (dist) {
+      double normalizedDist = *dist / i;
+      if (normalizedDist < smallestDist) {
+        smallestDist = normalizedDist;
+        keySize = i;
+      }
+    }
+  }
+  return keySize;
 }
