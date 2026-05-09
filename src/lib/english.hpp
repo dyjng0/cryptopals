@@ -12,6 +12,8 @@ struct MaxScoreResults {
 
 std::optional<int> getLetterIndex(const uint8_t byte);
 int letterFrequencyScore(const std::vector<uint8_t> &bytes);
-MaxScoreResults testKeys(const std::vector<uint8_t> &bytes);
+MaxScoreResults testXORKeys(const std::vector<uint8_t> &bytes);
 
 int findKeySize(const std::vector<uint8_t> &buffer);
+std::vector<uint8_t> decryptVigenere(const std::vector<uint8_t> &buffer,
+                                     int keySize);

@@ -35,7 +35,8 @@ int letterFrequencyScore(const std::vector<uint8_t> &bytes) {
   return score;
 }
 
-MaxScoreResults testKeys(const std::vector<uint8_t> &bytes) {
+// single-byte XOR
+MaxScoreResults testXORKeys(const std::vector<uint8_t> &bytes) {
   int maxScore = -1;
   uint8_t bestKey = 0;
   std::vector<uint8_t> maxScoreXOR;
@@ -67,4 +68,20 @@ int findKeySize(const std::vector<uint8_t> &buffer) {
     }
   }
   return keySize;
+}
+
+std::vector<uint8_t> decryptVigenere(const std::vector<uint8_t> &buffer,
+                                     int keySize) {
+  std::vector<uint8_t> key;
+  key.reserve(keySize);
+  int blocks = buffer.size() / keySize;
+  for (int i = 0; i < keySize; i++) {
+    std::vector<uint8_t> transposeBlock;
+    for (int blockNum = 0; blockNum < blocks; blockNum++) {
+      transposeBlock.push_back(buffer[blockNum * keySize + i]);
+    }
+    auto [maxScore, bestKey, maxScoreXOR] = testXORKeys(transposeBlock);
+    key.push_back(bestKey);
+  }
+  return key;
 }
