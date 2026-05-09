@@ -1,23 +1,37 @@
-#include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "src/challenges/challenges.hpp"
 #include "src/lib/encoding.hpp"
 #include "src/lib/english.hpp"
 
 int challenge1_06(int argc, char **argv) {
-  std::string s1, s2;
+  std::string fileName, fileText;
 
   if (argc == 1) {
-    s1 = "this is a test";
-    s2 = "wokka wokka!!!";
+    fileName = "resources/1-06.txt";
+  } else if (argc == 2) {
+    fileName = argv[1];
+  } else {
+    std::cerr << "Usage ./cryptopals 1-06 OR ./cryptopals 1-06 <fileName>\n";
+    return 1;
   }
 
-  std::vector<uint8_t> buffer1 = stringToBytes(s1);
-  std::vector<uint8_t> buffer2 = stringToBytes(s2);
-  auto hammingDist = findHammingDist(buffer1, buffer2);
-  std::cout << *hammingDist << '\n';
+  std::string fullText = "";
+  std::ifstream readFile(fileName);
+  while (getline(readFile, fileText)) {
+    fullText += fileText;
+  }
+
+  auto bytes = base64ToBytes(fullText);
+  if (!bytes) {
+    std::cerr << "Error: invalid base64.\n";
+    return 1;
+  }
+  int keySize = findKeySize(*bytes);
+  std::vector<uint8_t> decrypted = decryptVigenere(*bytes, keySize);
+  std::string decryptedString = bytesToString(decrypted);
+  std::cout << decryptedString << '\n';
   return 0;
 }
