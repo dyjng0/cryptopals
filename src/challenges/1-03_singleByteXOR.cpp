@@ -22,8 +22,7 @@ int challenge1_03(int argc, char *argv[]) {
     std::cerr << "Error: invalid hex string.\n";
     return 1;
   }
-  auto [maxScore, bestKey, maxScoreXOR] = breakSingleByteXOR(*bytes);
-  std::string result = bytesToString(maxScoreXOR);
-  std::cout << result << '\n';
+  auto [bestScore, bestKey, bestCandidate] = breakSingleByteXOR(*bytes);
+  std::cout << bytesToString(bestCandidate) << '\n';
   return 0;
 }

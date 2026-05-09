@@ -22,7 +22,8 @@ int challenge1_05(int argc, char **argv) {
 
   std::string key = "ICE";
   std::vector<uint8_t> byteKey = stringToBytes(key);
-  std::cout << bytesToHex(repeatingKeyXOR(stringToBytes(plaintext), byteKey))
-            << '\n';
+  std::vector<uint8_t> cipher = stringToBytes(plaintext);
+  repeatingKeyXOR(cipher, byteKey);
+  std::cout << bytesToHex(cipher) << '\n';
   return 0;
 }

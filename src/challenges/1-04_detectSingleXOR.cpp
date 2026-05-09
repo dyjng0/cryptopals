@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "src/challenges/challenges.hpp"
 #include "src/lib/cryptanalysis.hpp"
@@ -21,7 +20,7 @@ int challenge1_04(int argc, char **argv) {
   }
 
   int bestScore = -1;
-  std::vector<uint8_t> bestXOR;
+  std::vector<uint8_t> bestCandidate;
   std::ifstream readFile(fileName);
   while (getline(readFile, fileText)) {
     auto bytes = hexToBytes(fileText);
@@ -29,13 +28,12 @@ int challenge1_04(int argc, char **argv) {
       std::cerr << "Error: invalid hex string.\n";
       return 1;
     }
-    auto [maxScore, bestKey, maxScoreXOR] = breakSingleByteXOR(*bytes);
-    if (maxScore > bestScore) {
-      bestScore = maxScore;
-      bestXOR = maxScoreXOR;
+    auto [score, key, candidate] = breakSingleByteXOR(*bytes);
+    if (score > bestScore) {
+      bestScore = score;
+      bestCandidate = candidate;
     }
   }
-  std::string result = bytesToString(bestXOR);
-  std::cout << result;
+  std::cout << bytesToString(bestCandidate);
   return 0;
 }

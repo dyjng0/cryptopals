@@ -9,20 +9,21 @@
 
 // Single-byte XOR
 MaxScoreResults breakSingleByteXOR(const std::vector<uint8_t> &bytes) {
-  int maxScore = -1;
+  int bestScore = -1;
   uint8_t bestKey = 0;
-  std::vector<uint8_t> maxScoreXOR;
+  std::vector<uint8_t> bestCandidate;
   for (int keyIndex = 0; keyIndex < 256; keyIndex++) {
     uint8_t key = static_cast<uint8_t>(keyIndex);
-    std::vector<uint8_t> xorResult = singleByteXOR(bytes, key);
-    int score = letterFrequencyScore(xorResult);
-    if (score > maxScore) {
-      maxScore = score;
+    std::vector<uint8_t> candidate = bytes;
+    singleByteXOR(candidate, key);
+    int score = letterFrequencyScore(candidate);
+    if (score > bestScore) {
+      bestScore = score;
       bestKey = key;
-      maxScoreXOR = xorResult;
+      bestCandidate = candidate;
     }
   }
-  return {maxScore, bestKey, maxScoreXOR};
+  return {bestScore, bestKey, bestCandidate};
 }
 
 // Vigenere's Cipher
@@ -77,7 +78,8 @@ std::vector<uint8_t> breakVigenere(const std::vector<uint8_t> &buffer,
     for (int blockNum = 0; blockNum < blocks; blockNum++) {
       transposeBlock.push_back(buffer[blockNum * keySize + i]);
     }
-    auto [maxScore, bestKey, maxScoreXOR] = breakSingleByteXOR(transposeBlock);
+    auto [bestScore, bestKey, bestCandidate] =
+        breakSingleByteXOR(transposeBlock);
     key.push_back(bestKey);
   }
   return key;

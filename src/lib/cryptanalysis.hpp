@@ -5,12 +5,12 @@
 #include <vector>
 
 struct MaxScoreResults {
-  int maxScore;
+  int bestScore;
   uint8_t bestKey;
-  std::vector<uint8_t> maxScoreXOR;
+  std::vector<uint8_t> bestCandidate;
 };
 
-MaxScoreResults breakSingleByteXOR(const std::vector<uint8_t> &bytes);
+MaxScoreResults breakSingleByteXOR(std::vector<uint8_t> &bytes);
 
 std::optional<double> avgHammingDist(const std::vector<uint8_t> &buffer,
                                      int keySize);
