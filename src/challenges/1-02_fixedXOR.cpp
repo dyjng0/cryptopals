@@ -25,12 +25,7 @@ int challenge1_02(int argc, char *argv[]) {
     std::cerr << "Error: Invalid hex string.\n";
     return 1;
   }
-  auto xor_opt = fixedXOR(*bytes1, *bytes2);
-  if (!xor_opt) {
-    std::cerr << "Error: Buffers must be of equal length.\n";
-    return 1;
-  }
-  std::string result = bytesToHex(*xor_opt);
-  std::cout << result << '\n';
+  fixedXOR(*bytes1, *bytes2);
+  std::cout << bytesToHex(*bytes1) << '\n';
   return 0;
 }
