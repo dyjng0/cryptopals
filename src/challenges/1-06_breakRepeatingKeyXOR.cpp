@@ -7,14 +7,13 @@
 #include "src/lib/encoding.hpp"
 
 int challenge1_06(int argc, char **argv) {
-  std::string input;
+  std::string input = "";
   if (argc == 1) {
     std::string fileName, fileText;
     fileName = "resources/1-06.txt";
-    std::string fullText = "";
     std::ifstream readFile(fileName);
     while (getline(readFile, fileText)) {
-      fullText += fileText;
+      input += fileText;
     }
   } else if (argc == 2) {
     input = argv[1];
