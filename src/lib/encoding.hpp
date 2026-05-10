@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-std::optional<uint8_t> toHex(char c);
+std::optional<uint8_t> fromHex(char c);
 std::optional<uint8_t> fromBase64(char c);
 std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex);
 std::string bytesToHex(const std::vector<uint8_t> &bytes);

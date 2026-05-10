@@ -10,7 +10,7 @@ const std::string BASE64_TABLE =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const std::string HEX_TABLE = "0123456789abcdef";
 
-std::optional<uint8_t> toHex(char c) {
+std::optional<uint8_t> fromHex(char c) {
   if (c >= '0' && c <= '9') {
     return c - '0';
   } else if (c >= 'a' && c <= 'f') {
@@ -41,16 +41,15 @@ std::optional<uint8_t> fromBase64(char c) {
 }
 
 std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex) {
-  const int len = hex.length();
-  if (len % 2 != 0) {
+  if (hex.size() % 2 != 0) {
     return std::nullopt;
   }
   std::vector<uint8_t> bytes;
-  bytes.reserve(len / 2);
+  bytes.reserve(hex.size() / 2);
 
-  for (int i = 0; i < len; i += 2) {
-    auto high_opt = toHex(hex[i]);
-    auto low_opt = toHex(hex[i + 1]);
+  for (size_t i = 0; i < hex.size(); i += 2) {
+    auto high_opt = fromHex(hex[i]);
+    auto low_opt = fromHex(hex[i + 1]);
 
     if (!high_opt || !low_opt) {
       return std::nullopt;
@@ -62,11 +61,10 @@ std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex) {
 }
 
 std::string bytesToHex(const std::vector<uint8_t> &bytes) {
-  const size_t len = bytes.size();
   std::string output;
-  output.reserve(2 * len);
+  output.reserve(2 * bytes.size());
 
-  for (size_t i = 0; i < len; i++) {
+  for (size_t i = 0; i < bytes.size(); ++i) {
     output.push_back(HEX_TABLE[bytes[i] >> 4]);
     output.push_back(HEX_TABLE[bytes[i] & 0x0f]);
   }
@@ -74,11 +72,10 @@ std::string bytesToHex(const std::vector<uint8_t> &bytes) {
 }
 
 std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
-  const size_t len = bytes.size();
   std::string output;
-  output.reserve(((len + 2) / 3) * 4);
+  output.reserve(((bytes.size() + 2) / 3) * 4);
   size_t i = 0;
-  for (; i + 3 <= len; i += 3) {
+  for (; i + 3 <= bytes.size(); i += 3) {
     uint32_t bitstream = (static_cast<uint32_t>(bytes[i]) << 16) |
                          (static_cast<uint32_t>(bytes[i + 1]) << 8) |
                          (static_cast<uint32_t>(bytes[i + 2]));
@@ -88,7 +85,7 @@ std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
     output.push_back(BASE64_TABLE[bitstream & 0x3f]);
   }
 
-  size_t paddingCase = len - i;
+  size_t paddingCase = bytes.size() - i;
   if (paddingCase == 1) {
     uint32_t bitstream = static_cast<uint32_t>(bytes[i]) << 16;
     output.push_back(BASE64_TABLE[(bitstream >> 18) & 0x3f]);
@@ -112,17 +109,16 @@ std::optional<std::vector<uint8_t>> base64ToBytes(const std::string &base64) {
   }
 
   std::vector<uint8_t> bytes;
-  const size_t len = base64.size();
   size_t padding = 0;
-  if (len >= 2) {
-    if (base64[len - 1] == '=')
-      padding++;
-    if (base64[len - 2] == '=')
-      padding++;
+  if (base64.size() >= 2) {
+    if (base64[base64.size() - 1] == '=')
+      ++padding;
+    if (base64[base64.size() - 2] == '=')
+      ++padding;
   }
-  bytes.reserve((len / 4) * 3 - padding);
+  bytes.reserve((base64.size() / 4) * 3 - padding);
 
-  for (size_t i = 0; i < len; i += 4) {
+  for (size_t i = 0; i < base64.size(); i += 4) {
     auto c1 = fromBase64(base64[i]);
     auto c2 = fromBase64(base64[i + 1]);
     auto c3 = fromBase64(base64[i + 2]);
