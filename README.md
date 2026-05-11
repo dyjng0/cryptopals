@@ -1,7 +1,7 @@
 
 # Cryptopals
 
-This repository contains solutions to the [Cryptopals Crypto Challenges](https://www.cryptopals.com/), written in C++.
+This repository contains solutions to the [Cryptopals Crypto Challenges](https://www.cryptopals.com/) written in C++. I used this project to learn the C++ language and to practice lower level programming.
 
 # Build and Requirements
 
