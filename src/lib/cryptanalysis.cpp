@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -28,11 +29,8 @@ MaxScoreResults breakSingleByteXOR(const std::vector<uint8_t> &bytes) {
 }
 
 // Vigenere's Cipher
-std::optional<double> avgHammingDist(const std::vector<uint8_t> &buffer,
-                                     size_t keySize) {
-  if (static_cast<size_t>(2 * keySize) > buffer.size()) {
-    return std::nullopt;
-  }
+double avgHammingDist(const std::vector<uint8_t> &buffer, size_t keySize) {
+  assert(static_cast<size_t>(2 * keySize) > buffer.size());
 
   size_t blocks = std::min(buffer.size() / keySize, static_cast<size_t>(4));
   int totalDist = 0;
@@ -54,9 +52,9 @@ size_t findKeySize(const std::vector<uint8_t> &buffer) {
   double smallestDist = static_cast<double>(buffer.size()) / 2 * 8;
   size_t keySize = 0;
   for (size_t i = 2; i < buffer.size() / 2 && i < 40; ++i) {
-    auto dist = avgHammingDist(buffer, i);
+    double dist = avgHammingDist(buffer, i);
     if (dist) {
-      double normalizedDist = *dist / i;
+      double normalizedDist = dist / i;
       if (normalizedDist < smallestDist) {
         smallestDist = normalizedDist;
         keySize = i;
