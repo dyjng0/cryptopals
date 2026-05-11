@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -60,7 +61,7 @@ std::optional<std::vector<uint8_t>> hexToBytes(const std::string &hex) {
   return bytes;
 }
 
-std::string bytesToHex(const std::vector<uint8_t> &bytes) {
+std::string bytesToHex(std::span<const uint8_t> bytes) {
   std::string output;
   output.reserve(2 * bytes.size());
 
@@ -71,7 +72,7 @@ std::string bytesToHex(const std::vector<uint8_t> &bytes) {
   return output;
 }
 
-std::string bytesToBase64(const std::vector<uint8_t> &bytes) {
+std::string bytesToBase64(std::span<const uint8_t> bytes) {
   std::string output;
   output.reserve(((bytes.size() + 2) / 3) * 4);
   size_t i = 0;
@@ -143,7 +144,7 @@ std::optional<std::vector<uint8_t>> base64ToBytes(const std::string &base64) {
   return bytes;
 }
 
-std::string bytesToString(const std::vector<uint8_t> &bytes) {
+std::string bytesToString(std::span<const uint8_t> &bytes) {
   return std::string(bytes.begin(), bytes.end());
 }
 

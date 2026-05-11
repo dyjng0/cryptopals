@@ -10,26 +10,26 @@
 #include "src/lib/utils.hpp"
 
 // Single-byte XOR
-MaxScoreResults breakSingleByteXOR(const std::vector<uint8_t> &bytes) {
+MaxScoreResults breakSingleByteXOR(std::span<const uint8_t> bytes) {
   int bestScore = -1;
   uint8_t bestKey = 0;
   std::vector<uint8_t> bestCandidate;
   for (int keyIndex = 0; keyIndex < 256; ++keyIndex) {
     uint8_t key = static_cast<uint8_t>(keyIndex);
-    std::vector<uint8_t> candidate = bytes;
+    std::vector<uint8_t> candidate(bytes.begin(), bytes.end());
     singleByteXOR(candidate, key);
     int score = letterFrequencyScore(candidate);
     if (score > bestScore) {
       bestScore = score;
       bestKey = key;
-      bestCandidate = candidate;
+      bestCandidate = std::move(candidate);
     }
   }
   return {bestScore, bestKey, bestCandidate};
 }
 
 // Vigenere's Cipher
-double avgHammingDist(const std::vector<uint8_t> &buffer, size_t keySize) {
+double avgHammingDist(std::span<const uint8_t> buffer, size_t keySize) {
   assert(static_cast<size_t>(2 * keySize) > buffer.size());
 
   size_t blocks = std::min(buffer.size() / keySize, static_cast<size_t>(4));
@@ -48,7 +48,7 @@ double avgHammingDist(const std::vector<uint8_t> &buffer, size_t keySize) {
   return static_cast<double>(totalDist) / iterations;
 }
 
-size_t findKeySize(const std::vector<uint8_t> &buffer) {
+size_t findKeySize(std::span<const uint8_t> buffer) {
   double smallestDist = static_cast<double>(buffer.size()) / 2 * 8;
   size_t keySize = 0;
   for (size_t i = 2; i < buffer.size() / 2 && i < 40; ++i) {
@@ -64,7 +64,7 @@ size_t findKeySize(const std::vector<uint8_t> &buffer) {
   return keySize;
 }
 
-std::vector<uint8_t> breakVigenere(const std::vector<uint8_t> &buffer,
+std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
                                    size_t keySize) {
   std::vector<uint8_t> key;
   key.reserve(keySize);

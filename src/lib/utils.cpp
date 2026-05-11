@@ -8,7 +8,7 @@
 #include "src/lib/utils.hpp"
 
 // XOR
-void fixedXOR(std::vector<uint8_t> &buf1, const std::vector<uint8_t> &buf2) {
+void fixedXOR(std::vector<uint8_t> &buf1, std::span<const uint8_t> buf2) {
   assert(buf1.size() == buf2.size());
   for (size_t i = 0; i < buf1.size(); ++i) {
     buf1[i] ^= buf2[i];
@@ -22,7 +22,7 @@ void singleByteXOR(std::vector<uint8_t> &buffer, uint8_t key) {
 }
 
 void repeatingKeyXOR(std::vector<uint8_t> &buffer,
-                     const std::vector<uint8_t> &key) {
+                     std::span<const uint8_t> key) {
   size_t keyIndex = 0;
   for (size_t i = 0; i < buffer.size(); ++i) {
     buffer[i] ^= key[keyIndex];

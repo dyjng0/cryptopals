@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <span>
 #include <vector>
 
 struct MaxScoreResults {
@@ -9,9 +10,9 @@ struct MaxScoreResults {
   std::vector<uint8_t> bestCandidate;
 };
 
-MaxScoreResults breakSingleByteXOR(const std::vector<uint8_t> &bytes);
+MaxScoreResults breakSingleByteXOR(std::span<const uint8_t> bytes);
 
-double avgHammingDist(const std::vector<uint8_t> &buffer, size_t keySize);
-size_t findKeySize(const std::vector<uint8_t> &buffer);
-std::vector<uint8_t> breakVigenere(const std::vector<uint8_t> &buffer,
+double avgHammingDist(std::span<const uint8_t> buffer, size_t keySize);
+size_t findKeySize(std::span<const uint8_t> buffer);
+std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
                                    size_t keySize);

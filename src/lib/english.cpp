@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
-#include <vector>
+#include <span>
 
 #include "src/lib/english.hpp"
 
@@ -20,7 +20,7 @@ std::optional<int> getLetterIndex(const uint8_t byte) {
   return std::nullopt;
 }
 
-int letterFrequencyScore(const std::vector<uint8_t> &bytes) {
+int letterFrequencyScore(std::span<const uint8_t> bytes) {
   int score = 0;
   for (uint8_t byte : bytes) {
     auto letterIndex = getLetterIndex(byte);
