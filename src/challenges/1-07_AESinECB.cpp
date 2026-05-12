@@ -11,7 +11,7 @@ static constexpr std::array<uint8_t, 16> key = {'Y', 'E', 'L', 'L', 'O', 'W',
                                                 ' ', 'S', 'U', 'B', 'M', 'A',
                                                 'R', 'I', 'N', 'E'};
 
-int challenge1_06(int argc, char **argv) {
+int challenge1_07(int argc, char **argv) {
   std::string input = "";
   if (argc == 1) {
     std::string fileName, fileText;

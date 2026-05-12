@@ -30,7 +30,7 @@ MaxScoreResults breakSingleByteXOR(std::span<const uint8_t> bytes) {
 
 // Vigenere's Cipher
 double avgHammingDist(std::span<const uint8_t> buffer, size_t keySize) {
-  assert(static_cast<size_t>(2 * keySize) > buffer.size());
+  assert(2 * keySize <= buffer.size());
 
   size_t blocks = std::min(buffer.size() / keySize, static_cast<size_t>(4));
   int totalDist = 0;
@@ -53,12 +53,10 @@ size_t findKeySize(std::span<const uint8_t> buffer) {
   size_t keySize = 0;
   for (size_t i = 2; i < buffer.size() / 2 && i < 40; ++i) {
     double dist = avgHammingDist(buffer, i);
-    if (dist) {
-      double normalizedDist = dist / i;
-      if (normalizedDist < smallestDist) {
-        smallestDist = normalizedDist;
-        keySize = i;
-      }
+    double normalizedDist = dist / i;
+    if (normalizedDist < smallestDist) {
+      smallestDist = normalizedDist;
+      keySize = i;
     }
   }
   return keySize;
