@@ -1,13 +1,10 @@
 #include <array>
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
 #include <span>
 
-static constexpr int ROUNDS = 10;
-static constexpr int KEYS_SIZE = 176;
-static constexpr int BLOCK_SIZE = 16;
-static constexpr int WORD_SIZE = 4;
+#include "src/lib/aes.hpp"
+
 static constexpr std::array<uint8_t, 10> RCON = {0x01, 0x02, 0x04, 0x08, 0x10,
                                                  0x20, 0x40, 0x80, 0x1b, 0x36};
 static constexpr std::array<uint8_t, 256> SBOX = {
@@ -258,7 +255,7 @@ expandKey(std::span<const uint8_t, BLOCK_SIZE> key) {
   std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> roundKeys;
   std::copy(key.begin(), key.end(), roundKeys[0].begin());
 
-  for (size_t i = 4; i < KEYS_SIZE / WORD_SIZE; ++i) {
+  for (size_t i = 4; i < 4 * (ROUNDS + 1); ++i) {
     size_t round = i / 4;
     size_t byteOffset = (i % 4) * 4;
 
