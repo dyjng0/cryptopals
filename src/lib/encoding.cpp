@@ -144,7 +144,7 @@ std::optional<std::vector<uint8_t>> base64ToBytes(const std::string &base64) {
   return bytes;
 }
 
-std::string bytesToString(std::span<const uint8_t> &bytes) {
+std::string bytesToString(std::span<const uint8_t> bytes) {
   return std::string(bytes.begin(), bytes.end());
 }
 

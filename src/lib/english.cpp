@@ -5,11 +5,11 @@
 
 #include "src/lib/english.hpp"
 
-static constexpr std::array<int, 26> LETTER_FREQUENCY = {
+constexpr std::array<int, 26> LETTER_FREQUENCY = {
     855, 160, 316, 387, 1210, 218, 209, 496, 733, 22,  81, 421, 253,
     717, 747, 207, 10,  633,  673, 894, 268, 106, 183, 19, 172, 11};
-static constexpr int SPACE_SCORE = 1300;
-static constexpr int NON_PRINTABLE_PENALTY = -5000;
+constexpr int SPACE_SCORE = 1300;
+constexpr int NON_PRINTABLE_PENALTY = -5000;
 
 std::optional<int> getLetterIndex(const uint8_t byte) {
   if (byte >= 'a' && byte <= 'z') {
