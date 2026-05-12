@@ -3,9 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
-#include <vector>
 
-static constexpr int ROUNDS = 11;
+static constexpr int ROUNDS = 10;
 static constexpr int KEYS_SIZE = 176;
 static constexpr int BLOCK_SIZE = 16;
 static constexpr int WORD_SIZE = 4;
@@ -254,27 +253,32 @@ void invMixColumns(std::span<uint8_t, BLOCK_SIZE> block) {
 }
 
 // key schedule
-std::array<uint8_t, KEYS_SIZE>
+std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1>
 expandKey(std::span<const uint8_t, BLOCK_SIZE> key) {
-  std::array<uint8_t, KEYS_SIZE> roundKeys;
-  std::copy(key.begin(), key.end(), roundKeys.begin());
+  std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> roundKeys;
+  std::copy(key.begin(), key.end(), roundKeys[0].begin());
 
   for (size_t i = 4; i < KEYS_SIZE / WORD_SIZE; ++i) {
-    size_t cur = WORD_SIZE * i;
-    size_t prev = WORD_SIZE * (i - 1);
-    size_t prevWORD = WORD_SIZE * (i - WORD_SIZE);
+    size_t round = i / 4;
+    size_t byteOffset = (i % 4) * 4;
 
     if (i % 4 == 0) {
       // W_i = W_(i-N) ^ subWord(rotWord(W_(i-1))) ^ rcon_(i/N)
-      roundKeys[cur] = roundKeys[prevWORD] ^ SBOX[roundKeys[prev + 1]] ^
-                       RCON[i / WORD_SIZE - 1];
-      roundKeys[cur + 1] = roundKeys[prevWORD + 1] ^ SBOX[roundKeys[prev + 2]];
-      roundKeys[cur + 2] = roundKeys[prevWORD + 2] ^ SBOX[roundKeys[prev + 3]];
-      roundKeys[cur + 3] = roundKeys[prevWORD + 3] ^ SBOX[roundKeys[prev]];
+      roundKeys[round][byteOffset] = roundKeys[round - 1][byteOffset] ^
+                                     SBOX[roundKeys[round - 1][12 + 1]] ^
+                                     RCON[i / 4 - 1];
+      roundKeys[round][byteOffset + 1] = roundKeys[round - 1][byteOffset + 1] ^
+                                         SBOX[roundKeys[round - 1][12 + 2]];
+      roundKeys[round][byteOffset + 2] = roundKeys[round - 1][byteOffset + 2] ^
+                                         SBOX[roundKeys[round - 1][12 + 3]];
+      roundKeys[round][byteOffset + 3] =
+          roundKeys[round - 1][byteOffset + 3] ^ SBOX[roundKeys[round - 1][12]];
     } else {
       // W_i = W_(i-N) ^ W_(i-1)
       for (size_t j = 0; j < 4; ++j) {
-        roundKeys[cur + j] = roundKeys[prevWORD + j] ^ roundKeys[prev + j];
+        roundKeys[round][byteOffset + j] =
+            roundKeys[round - 1][byteOffset + j] ^
+            roundKeys[round][byteOffset - 4 + j];
       }
     }
   }
@@ -282,5 +286,26 @@ expandKey(std::span<const uint8_t, BLOCK_SIZE> key) {
 }
 
 // decrypt
-std::vector<uint8_t> decryptAES(std::vector<uint8_t> &buffer,
-                                std::vector<uint8_t> key) {}
+void decryptAES(std::span<uint8_t> buffer,
+                std::span<const uint8_t, BLOCK_SIZE> key) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> keys = expandKey(key);
+
+  for (size_t blockIndex = 0; blockIndex < buffer.size();
+       blockIndex += BLOCK_SIZE) {
+    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + blockIndex,
+                                         BLOCK_SIZE);
+    addRoundKey(block, keys[ROUNDS]);
+
+    for (size_t round = ROUNDS - 1; round > 0; --round) {
+      invShiftRows(block);
+      invSubBytes(block);
+      addRoundKey(block, keys[round]);
+      invMixColumns(block);
+    }
+
+    invShiftRows(block);
+    invSubBytes(block);
+    addRoundKey(block, keys[0]);
+  }
+}
