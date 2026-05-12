@@ -29,7 +29,6 @@ int challenge1_06(int argc, char **argv) {
   }
   int keySize = findKeySize(*bytes);
   std::vector<uint8_t> decrypted = breakVigenere(*bytes, keySize);
-  std::string decryptedString = bytesToString(decrypted);
-  std::cout << decryptedString << '\n';
+  std::cout << bytesToString(decrypted) << '\n';
   return 0;
 }
