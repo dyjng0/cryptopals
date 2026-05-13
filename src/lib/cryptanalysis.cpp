@@ -2,9 +2,11 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <set>
 #include <span>
 #include <vector>
 
+#include "src/lib/aes.hpp"
 #include "src/lib/cryptanalysis.hpp"
 #include "src/lib/english.hpp"
 #include "src/lib/utils.hpp"
@@ -76,4 +78,19 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
     key.push_back(bestKey);
   }
   return key;
+}
+
+// Block cipher modes of operation
+int getECBScore(std::span<const uint8_t> buffer) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  int repeatedBlocks = 0;
+  std::set<std::span<const uint8_t, BLOCK_SIZE>> s;
+  for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
+    std::span<const uint8_t, BLOCK_SIZE> block(buffer.begin() + i, BLOCK_SIZE);
+    auto [it, inserted] = s.insert(block);
+    if (!inserted) {
+      ++repeatedBlocks;
+    }
+  }
+  return repeatedBlocks;
 }
