@@ -14,6 +14,7 @@ const std::unordered_map<std::string, ChallengeFunc> challenges = {
     {"1-06", challenge1_06},
     {"1-07", challenge1_07},
     {"1-08", challenge1_08},
+    {"2-09", challenge2_09},
 };
 
 int main(int argc, char *argv[]) {

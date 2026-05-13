@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cstdint>
 #include <span>
+#include <sys/types.h>
+#include <vector>
 
 #include "src/lib/aes.hpp"
 
@@ -279,6 +281,16 @@ expandKey(std::span<const uint8_t, BLOCK_SIZE> key) {
     }
   }
   return roundKeys;
+}
+
+// padding
+std::vector<uint8_t> padPKCS7(std::span<const uint8_t> buffer) {
+  std::vector<uint8_t> padded(buffer.begin(), buffer.end());
+  uint8_t numPad = BLOCK_SIZE - (buffer.size() % BLOCK_SIZE);
+  for (uint8_t i = 0; i < numPad; ++i) {
+    padded.push_back(numPad);
+  }
+  return padded;
 }
 
 // decrypt
