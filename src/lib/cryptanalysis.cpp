@@ -1,9 +1,12 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <set>
 #include <span>
+#include <unordered_set>
 #include <vector>
 
 #include "src/lib/aes.hpp"
@@ -81,10 +84,30 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
 }
 
 // Block cipher modes of operation
+// Hash functions for span
+struct SpanHash {
+  size_t operator()(std::span<const uint8_t, BLOCK_SIZE> bytes) const {
+    size_t hash = 0;
+    std::hash<uint8_t> hasher;
+    for (uint8_t byte : bytes) {
+      hash ^= hasher(byte);
+    }
+    return hash;
+  }
+};
+
+struct SpanEqual {
+  bool operator()(std::span<const uint8_t, BLOCK_SIZE> a,
+                  std::span<const uint8_t, BLOCK_SIZE> b) const {
+    return std::equal(a.begin(), a.end(), b.begin());
+  }
+};
+
 int getECBScore(std::span<const uint8_t> buffer) {
   assert(buffer.size() % BLOCK_SIZE == 0);
   int repeatedBlocks = 0;
-  std::set<std::span<const uint8_t, BLOCK_SIZE>> s;
+  std::unordered_set<std::span<const uint8_t, BLOCK_SIZE>, SpanHash, SpanEqual>
+      s;
   for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
     std::span<const uint8_t, BLOCK_SIZE> block(buffer.begin() + i, BLOCK_SIZE);
     auto [it, inserted] = s.insert(block);
