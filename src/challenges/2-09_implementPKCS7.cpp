@@ -19,6 +19,6 @@ int challenge2_09(int argc, char **argv) {
 
   std::vector<uint8_t> bytes = stringToBytes(input);
   std::vector<uint8_t> paddedBytes = padPKCS7(bytes);
-  std::cout << bytesToString(paddedBytes);
+  std::cout << bytesToHex(paddedBytes) << '\n';
   return 0;
 }
