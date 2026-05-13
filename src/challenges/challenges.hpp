@@ -7,3 +7,4 @@ int challenge1_04(int argc, char *argv[]);
 int challenge1_05(int argc, char *argv[]);
 int challenge1_06(int argc, char *argv[]);
 int challenge1_07(int argc, char *argv[]);
+int challenge1_08(int argc, char *argv[]);
