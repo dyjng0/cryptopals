@@ -202,6 +202,31 @@ static void addRoundKey(std::span<uint8_t, BLOCK_SIZE> block,
   }
 }
 
+static void shiftRows(std::span<uint8_t, BLOCK_SIZE> block) {
+  uint8_t temp;
+  // row 1
+  temp = block[1];
+  block[1] = block[5];
+  block[5] = block[9];
+  block[9] = block[13];
+  block[13] = temp;
+
+  // row 2
+  temp = block[14];
+  block[14] = block[6];
+  block[6] = temp;
+  temp = block[10];
+  block[10] = block[2];
+  block[2] = temp;
+
+  // row 3
+  temp = block[15];
+  block[15] = block[11];
+  block[11] = block[7];
+  block[7] = block[3];
+  block[3] = temp;
+}
+
 static void invShiftRows(std::span<uint8_t, BLOCK_SIZE> block) {
   uint8_t temp;
   // row 1
@@ -227,9 +252,29 @@ static void invShiftRows(std::span<uint8_t, BLOCK_SIZE> block) {
   block[15] = temp;
 }
 
+static void subBytes(std::span<uint8_t, BLOCK_SIZE> block) {
+  for (size_t i = 0; i < BLOCK_SIZE; ++i) {
+    block[i] = SBOX[block[i]];
+  }
+}
+
 static void invSubBytes(std::span<uint8_t, BLOCK_SIZE> block) {
   for (size_t i = 0; i < BLOCK_SIZE; ++i) {
     block[i] = INV_SBOX[block[i]];
+  }
+}
+
+static void mixColumns(std::span<uint8_t, BLOCK_SIZE> block) {
+  uint8_t s0, s1, s2, s3;
+  for (size_t i = 0; i < BLOCK_SIZE; i += 4) {
+    s0 = block[i];
+    s1 = block[i + 1];
+    s2 = block[i + 2];
+    s3 = block[i + 3];
+    block[i] = GF_MULT_02[s0] ^ GF_MULT_03[s1] ^ s2 ^ s3;
+    block[i + 1] = s0 ^ GF_MULT_02[s1] ^ GF_MULT_03[s2] ^ s3;
+    block[i + 2] = s0 ^ s1 ^ GF_MULT_02[s2] ^ GF_MULT_03[s3];
+    block[i + 3] = GF_MULT_03[s0] ^ s1 ^ s2 ^ GF_MULT_02[s3];
   }
 }
 
@@ -291,6 +336,31 @@ std::vector<uint8_t> padPKCS7(std::span<const uint8_t> buffer) {
     padded.push_back(numPad);
   }
   return padded;
+}
+
+// encrypt
+void encryptAES(std::span<uint8_t> buffer,
+                std::span<const uint8_t, BLOCK_SIZE> key) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> keys = expandKey(key);
+
+  for (size_t blockIndex = 0; blockIndex < buffer.size();
+       blockIndex += BLOCK_SIZE) {
+    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + blockIndex,
+                                         BLOCK_SIZE);
+    addRoundKey(block, keys[0]);
+
+    for (size_t round = 1; round < ROUNDS; ++round) {
+      subBytes(block);
+      shiftRows(block);
+      mixColumns(block);
+      addRoundKey(block, keys[round]);
+    }
+
+    subBytes(block);
+    shiftRows(block);
+    addRoundKey(block, keys[ROUNDS]);
+  }
 }
 
 // decrypt
