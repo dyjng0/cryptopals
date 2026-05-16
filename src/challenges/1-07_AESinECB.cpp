@@ -32,7 +32,7 @@ int challenge1_07(int argc, char **argv) {
     std::cerr << "Error: invalid base64.\n";
     return 1;
   }
-  decryptAES(*buffer, key);
+  decryptAES_ECB(*buffer, key);
   std::cout << bytesToString(*buffer) << '\n';
   return 0;
 }

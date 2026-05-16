@@ -338,52 +338,54 @@ std::vector<uint8_t> padPKCS7(std::span<const uint8_t> buffer) {
   return padded;
 }
 
-// encrypt
-void encryptAES(std::span<uint8_t> buffer,
-                std::span<const uint8_t, BLOCK_SIZE> key) {
-  assert(buffer.size() % BLOCK_SIZE == 0);
-  std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> keys = expandKey(key);
+// Internal AES functions
+using RoundKeys = std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1>;
 
-  for (size_t blockIndex = 0; blockIndex < buffer.size();
-       blockIndex += BLOCK_SIZE) {
-    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + blockIndex,
-                                         BLOCK_SIZE);
-    addRoundKey(block, keys[0]);
-
-    for (size_t round = 1; round < ROUNDS; ++round) {
-      subBytes(block);
-      shiftRows(block);
-      mixColumns(block);
-      addRoundKey(block, keys[round]);
-    }
-
+static void encryptBlock(std::span<uint8_t, BLOCK_SIZE> block,
+                         const RoundKeys &keys) {
+  addRoundKey(block, keys[0]);
+  for (size_t round = 1; round < ROUNDS; ++round) {
     subBytes(block);
     shiftRows(block);
-    addRoundKey(block, keys[ROUNDS]);
+    mixColumns(block);
+    addRoundKey(block, keys[round]);
+  }
+  subBytes(block);
+  shiftRows(block);
+  addRoundKey(block, keys[ROUNDS]);
+}
+
+static void decryptBlock(std::span<uint8_t, BLOCK_SIZE> block,
+                         const RoundKeys &keys) {
+  addRoundKey(block, keys[ROUNDS]);
+  for (size_t round = ROUNDS - 1; round > 0; --round) {
+    invShiftRows(block);
+    invSubBytes(block);
+    addRoundKey(block, keys[round]);
+    invMixColumns(block);
+  }
+  invShiftRows(block);
+  invSubBytes(block);
+  addRoundKey(block, keys[0]);
+}
+
+// ECB Mode
+void encryptAES_ECB(std::span<uint8_t> buffer,
+                    std::span<const uint8_t, BLOCK_SIZE> key) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  const RoundKeys keys = expandKey(key);
+  for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
+    encryptBlock(std::span<uint8_t, BLOCK_SIZE>(buffer.data() + i, BLOCK_SIZE),
+                 keys);
   }
 }
 
-// decrypt
-void decryptAES(std::span<uint8_t> buffer,
-                std::span<const uint8_t, BLOCK_SIZE> key) {
+void decryptAES_ECB(std::span<uint8_t> buffer,
+                    std::span<const uint8_t, BLOCK_SIZE> key) {
   assert(buffer.size() % BLOCK_SIZE == 0);
-  std::array<std::array<uint8_t, BLOCK_SIZE>, ROUNDS + 1> keys = expandKey(key);
-
-  for (size_t blockIndex = 0; blockIndex < buffer.size();
-       blockIndex += BLOCK_SIZE) {
-    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + blockIndex,
-                                         BLOCK_SIZE);
-    addRoundKey(block, keys[ROUNDS]);
-
-    for (size_t round = ROUNDS - 1; round > 0; --round) {
-      invShiftRows(block);
-      invSubBytes(block);
-      addRoundKey(block, keys[round]);
-      invMixColumns(block);
-    }
-
-    invShiftRows(block);
-    invSubBytes(block);
-    addRoundKey(block, keys[0]);
+  const RoundKeys keys = expandKey(key);
+  for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
+    decryptBlock(std::span<uint8_t, BLOCK_SIZE>(buffer.data() + i, BLOCK_SIZE),
+                 keys);
   }
 }
