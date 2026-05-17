@@ -401,8 +401,7 @@ void encryptAES_CBC(std::span<uint8_t> buffer,
   std::copy(iv.begin(), iv.end(), previousBlock.begin());
   for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
     std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + i, BLOCK_SIZE);
-    for (size_t j = 0; j < BLOCK_SIZE; ++j)
-      block[j] ^= previousBlock[j];
+    fixedXOR(block, previousBlock);
     encryptBlock(block, keys);
     std::copy(block.begin(), block.end(), previousBlock.begin());
   }
@@ -420,8 +419,7 @@ void decryptAES_CBC(std::span<uint8_t> buffer,
     std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + i, BLOCK_SIZE);
     std::copy(block.begin(), block.end(), cipherBlock.begin());
     decryptBlock(block, keys);
-    for (size_t j = 0; j < BLOCK_SIZE; ++j)
-      block[j] ^= previousBlock[j];
+    fixedXOR(block, previousBlock);
     previousBlock = cipherBlock;
   }
 }
