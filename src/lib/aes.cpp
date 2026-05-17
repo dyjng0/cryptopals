@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "src/lib/aes.hpp"
+#include "src/lib/utils.hpp"
 
 constexpr std::array<uint8_t, 10> RCON = {0x01, 0x02, 0x04, 0x08, 0x10,
                                           0x20, 0x40, 0x80, 0x1b, 0x36};
@@ -387,5 +388,40 @@ void decryptAES_ECB(std::span<uint8_t> buffer,
   for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
     decryptBlock(std::span<uint8_t, BLOCK_SIZE>(buffer.data() + i, BLOCK_SIZE),
                  keys);
+  }
+}
+
+// CBC Mode
+void encryptAES_CBC(std::span<uint8_t> buffer,
+                    std::span<const uint8_t, BLOCK_SIZE> iv,
+                    std::span<const uint8_t, BLOCK_SIZE> key) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  const RoundKeys keys = expandKey(key);
+  std::array<uint8_t, BLOCK_SIZE> previousBlock;
+  std::copy(iv.begin(), iv.end(), previousBlock.begin());
+  for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
+    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + i, BLOCK_SIZE);
+    for (size_t j = 0; j < BLOCK_SIZE; ++j)
+      block[j] ^= previousBlock[j];
+    encryptBlock(block, keys);
+    std::copy(block.begin(), block.end(), previousBlock.begin());
+  }
+}
+
+void decryptAES_CBC(std::span<uint8_t> buffer,
+                    std::span<const uint8_t, BLOCK_SIZE> iv,
+                    std::span<const uint8_t, BLOCK_SIZE> key) {
+  assert(buffer.size() % BLOCK_SIZE == 0);
+  const RoundKeys keys = expandKey(key);
+  std::array<uint8_t, BLOCK_SIZE> previousBlock;
+  std::copy(iv.begin(), iv.end(), previousBlock.begin());
+  std::array<uint8_t, BLOCK_SIZE> cipherBlock;
+  for (size_t i = 0; i < buffer.size(); i += BLOCK_SIZE) {
+    std::span<uint8_t, BLOCK_SIZE> block(buffer.data() + i, BLOCK_SIZE);
+    std::copy(block.begin(), block.end(), cipherBlock.begin());
+    decryptBlock(block, keys);
+    for (size_t j = 0; j < BLOCK_SIZE; ++j)
+      block[j] ^= previousBlock[j];
+    previousBlock = cipherBlock;
   }
 }
