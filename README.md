@@ -1,7 +1,6 @@
-
 # Cryptopals
 
-This repository contains solutions to the [Cryptopals Crypto Challenges](https://www.cryptopals.com/) written in C++. I used this project to learn the C++ language and to practice lower level programming.
+This repository contains solutions to the [Cryptopals Crypto Challenges](https://www.cryptopals.com/) written in C++. I used this project as an opportunity to learn C++ and practice lower level programming. Some of the formatting and code structure is inspired by [garyg1](https://github.com/garyg1/cryptopals) and [davidscholberg](https://github.com/davidscholberg/cryptopals-cpp/tree/master).
 
 # Build and Requirements
 
@@ -10,7 +9,7 @@ The following are required to build:
 -   g++
 -   make
 
-To build, navigate to the repository root directory and run `make`. The `cryptopals` binary will be created in the repository root.
+Navigate to the repository root directory and run `make`. The `cryptopals` binary will be created in the repository root.
 
 # Usage
 
@@ -22,7 +21,7 @@ For example,
 ./cryptopals 1-01
 ```
 
-Many challenges can also take alternative arguments. See the individual challenge source files for supported arguments. For example,
+Challenges can also take alternative arguments. See the individual challenge source files for supported arguments. For example,
 
 ```
 ./cryptopals 1-01 deadbeef
