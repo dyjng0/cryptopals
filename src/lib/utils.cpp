@@ -1,8 +1,10 @@
 #include <bit>
 #include <cassert>
 #include <cstdint>
+#include <fstream>
 #include <optional>
 #include <span>
+#include <vector>
 
 #include "src/lib/utils.hpp"
 
@@ -42,4 +44,12 @@ std::optional<int> findHammingDist(std::span<const uint8_t> buffer1,
     dist += std::popcount(static_cast<uint8_t>(buffer1[i] ^ buffer2[i]));
   }
   return dist;
+}
+
+// random bytes
+std::vector<uint8_t> generateBytes(size_t n) {
+  std::ifstream urandom("/dev/urandom", std::ios::binary);
+  std::vector<uint8_t> bytes(n);
+  urandom.read(reinterpret_cast<char *>(bytes.data()), n);
+  return bytes;
 }

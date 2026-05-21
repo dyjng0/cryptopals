@@ -8,7 +8,6 @@ constexpr int BLOCK_SIZE = 16;
 constexpr int ROUNDS = 10;
 
 std::vector<uint8_t> padPKCS7(std::span<const uint8_t> buffer);
-std::array<uint8_t, BLOCK_SIZE> generateKey();
 
 // ECB Mode
 void encryptAES_ECB(std::span<uint8_t> buffer,

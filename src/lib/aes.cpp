@@ -2,9 +2,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <span>
-#include <stdexcept>
 #include <sys/types.h>
 #include <vector>
 
@@ -371,21 +369,6 @@ static void decryptBlock(std::span<uint8_t, BLOCK_SIZE> block,
   invShiftRows(block);
   invSubBytes(block);
   addRoundKey(block, keys[0]);
-}
-
-// generate key
-std::array<uint8_t, BLOCK_SIZE> generateKey() {
-  std::array<uint8_t, BLOCK_SIZE> key;
-  std::ifstream urandom("/dev/urandom", std::ios::binary);
-  if (!urandom) {
-    throw std::runtime_error("Failed to open /dev/urandom");
-  }
-
-  urandom.read(reinterpret_cast<char *>(key.data()), BLOCK_SIZE);
-  if (!urandom) {
-    throw std::runtime_error("Failed to read from /dev/urandom");
-  }
-  return key;
 }
 
 // ECB Mode
