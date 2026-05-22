@@ -16,3 +16,4 @@ std::optional<int> findHammingDist(std::span<const uint8_t> buffer1,
 
 // random bytes
 std::vector<uint8_t> generateBytes(size_t n);
+template <size_t N> std::array<uint8_t, N> generateBytes();

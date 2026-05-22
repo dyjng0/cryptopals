@@ -53,3 +53,10 @@ std::vector<uint8_t> generateBytes(size_t n) {
   urandom.read(reinterpret_cast<char *>(bytes.data()), n);
   return bytes;
 }
+
+template <size_t N> std::array<uint8_t, N> generateBytes() {
+  std::ifstream urandom("/dev/urandom", std::ios::binary);
+  std::array<uint8_t, N> bytes;
+  urandom.read(reinterpret_cast<char *>(bytes.data()), N);
+  return bytes;
+}
