@@ -12,7 +12,7 @@ static std::uniform_int_distribution<size_t> affixDist{5, 10};
 static std::uniform_int_distribution<size_t> modeDist{0, 1};
 
 std::vector<uint8_t> modeEncryptionOracle(std::span<const uint8_t> plaintext) {
-  std::array<uint8_t, BLOCK_SIZE> key = generateBytes<BLOCK_SIZE>();
+  std::vector<uint8_t> key = generateBytes(BLOCK_SIZE);
 
   size_t prefixLen = affixDist(rng);
   size_t suffixLen = affixDist(rng);
@@ -26,10 +26,13 @@ std::vector<uint8_t> modeEncryptionOracle(std::span<const uint8_t> plaintext) {
   padded = padPKCS7(padded);
 
   if (modeDist(rng) == 0) {
-    encryptAES_ECB(padded, key);
+    encryptAES_ECB(padded,
+                   std::span<uint8_t, BLOCK_SIZE>(key.data(), BLOCK_SIZE));
   } else {
-    std::array<uint8_t, BLOCK_SIZE> iv = generateBytes<BLOCK_SIZE>();
-    encryptAES_CBC(padded, iv, key);
+    std::vector<uint8_t> iv = generateBytes(BLOCK_SIZE);
+    encryptAES_CBC(padded,
+                   std::span<uint8_t, BLOCK_SIZE>(iv.data(), BLOCK_SIZE),
+                   std::span<uint8_t, BLOCK_SIZE>(key.data(), BLOCK_SIZE));
   }
   return padded;
 }
