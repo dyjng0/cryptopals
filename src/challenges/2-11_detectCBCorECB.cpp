@@ -3,13 +3,14 @@
 #include <string>
 
 #include "src/challenges/challenges.hpp"
+#include "src/lib/cryptanalysis.hpp"
 #include "src/lib/encoding.hpp"
 #include "src/lib/oracles.hpp"
 
 int challenge2_11(int argc, char **argv) {
   std::string input = "";
   if (argc == 1) {
-    // 11 + 16 + 16 blocks of a in base64
+    // 11 + 16 + 16 blocks of 'a' in base64
     // if in ECB, second and third block must be the same
     input = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSA=";
   } else if (argc == 2) {
@@ -25,6 +26,9 @@ int challenge2_11(int argc, char **argv) {
     return 1;
   }
   std::vector<uint8_t> ciphertext = modeEncryptionOracle(*buffer);
-  std::cout << bytesToHex(ciphertext) << '\n';
+  std::string mode = detectCBCorECB(ciphertext);
+
+  std::cout << "Ciphertext: " << bytesToHex(ciphertext) << '\n';
+  std::cout << "Detected: " << mode << '\n';
   return 0;
 }

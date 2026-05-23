@@ -1,17 +1,14 @@
-#include <algorithm>
 #include <cassert>
-#include <cmath>
-#include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <set>
 #include <span>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
 #include "src/lib/aes.hpp"
 #include "src/lib/cryptanalysis.hpp"
 #include "src/lib/english.hpp"
+#include "src/lib/oracles.hpp"
 #include "src/lib/utils.hpp"
 
 // Single-byte XOR
@@ -116,4 +113,8 @@ int getECBScore(std::span<const uint8_t> buffer) {
     }
   }
   return repeatedBlocks;
+}
+
+std::string detectCBCorECB(std::span<const uint8_t> ciphertext) {
+  return getECBScore(ciphertext) > 0 ? "ECB" : "CBC";
 }

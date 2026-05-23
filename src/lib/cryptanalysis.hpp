@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <span>
+#include <string>
 #include <vector>
 
 struct MaxScoreResults {
@@ -18,3 +19,4 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
                                    size_t keySize);
 
 int getECBScore(std::span<const uint8_t> buffer);
+std::string detectCBCorECB(std::span<const uint8_t> ciphertext);
