@@ -1,9 +1,9 @@
 #include <bit>
 #include <cassert>
 #include <cstdint>
-#include <fstream>
 #include <optional>
 #include <span>
+#include <sys/random.h>
 #include <vector>
 
 #include "src/lib/utils.hpp"
@@ -48,8 +48,7 @@ std::optional<int> findHammingDist(std::span<const uint8_t> buffer1,
 
 // random bytes
 std::vector<uint8_t> generateBytes(size_t n) {
-  std::ifstream urandom("/dev/urandom", std::ios::binary);
   std::vector<uint8_t> bytes(n);
-  urandom.read(reinterpret_cast<char *>(bytes.data()), n);
+  getrandom(bytes.data(), n, 0);
   return bytes;
 }
