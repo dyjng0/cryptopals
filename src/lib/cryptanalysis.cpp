@@ -8,7 +8,6 @@
 #include "src/lib/aes.hpp"
 #include "src/lib/cryptanalysis.hpp"
 #include "src/lib/english.hpp"
-#include "src/lib/oracles.hpp"
 #include "src/lib/utils.hpp"
 
 // Single-byte XOR
@@ -100,6 +99,7 @@ struct SpanEqual {
   }
 };
 
+// Block Cipher Functions
 int getECBScore(std::span<const uint8_t> buffer) {
   assert(buffer.size() % BLOCK_SIZE == 0);
   int repeatedBlocks = 0;
@@ -117,4 +117,20 @@ int getECBScore(std::span<const uint8_t> buffer) {
 
 std::string detectCBCorECB(std::span<const uint8_t> ciphertext) {
   return getECBScore(ciphertext) > 0 ? "ECB" : "CBC";
+}
+
+size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
+                     std::span<const uint8_t> plaintext) {
+  std::vector<uint8_t> padding;
+  padding.reserve(plaintext.size() + 32);
+  padding.insert(padding.end(), plaintext.begin(), plaintext.end());
+  size_t len = oracle(padding).size();
+
+  padding.push_back(padChar);
+  size_t paddedLen = oracle(padding).size();
+  while (len == paddedLen) {
+    padding.push_back(padChar);
+    paddedLen = oracle(padding).size();
+  }
+  return paddedLen - len;
 }

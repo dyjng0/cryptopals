@@ -1,16 +1,15 @@
-#include <cstdint>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "src/challenges/challenges.hpp"
+#include "src/lib/cryptanalysis.hpp"
 #include "src/lib/encoding.hpp"
 #include "src/lib/oracles.hpp"
 
 int challenge2_12(int argc, char **argv) {
   std::string input = "";
   if (argc == 1) {
-    input = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSA=";
+    input = "Yerr";
   } else if (argc == 2) {
     input = argv[1];
   } else {
@@ -22,7 +21,7 @@ int challenge2_12(int argc, char **argv) {
     std::cerr << "Error: invalid base64.\n";
     return 1;
   }
-  std::vector<uint8_t> ciphertext = ecbEncryptionOracle(*buffer);
-  std::cout << "Ciphertext: " << bytesToHex(ciphertext) << '\n';
+  size_t blockSize = findBlockSize(ecbEncryptionOracle, 'A', *buffer);
+  std::cout << "blockSize: " << blockSize << '\n';
   return 0;
 }
