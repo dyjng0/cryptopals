@@ -1,5 +1,7 @@
+#include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "src/challenges/challenges.hpp"
 #include "src/lib/cryptanalysis.hpp"
@@ -21,7 +23,15 @@ int challenge2_12(int argc, char **argv) {
     std::cerr << "Error: invalid base64.\n";
     return 1;
   }
+
   size_t blockSize = findBlockSize(ecbEncryptionOracle, 'A', *buffer);
-  std::cout << "blockSize: " << blockSize << '\n';
+  std::vector<uint8_t> testInput(2 * blockSize, 'A');
+  std::vector<uint8_t> ciphertext = ecbEncryptionOracle(testInput);
+  if (!isECB(ciphertext)) {
+    std::cerr << "Error: must be encoded in ECB mode.\n";
+    return 1;
+  }
+
+  std::cout << "ECB mode!" << '\n';
   return 0;
 }
