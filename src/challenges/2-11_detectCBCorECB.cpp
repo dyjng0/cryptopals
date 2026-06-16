@@ -26,10 +26,9 @@ int challenge2_11(int argc, char **argv) {
     return 1;
   }
   std::vector<uint8_t> ciphertext = modeEncryptionOracle(*buffer);
-  bool mode = isECB(ciphertext);
 
   std::cout << "Ciphertext: " << bytesToHex(ciphertext) << '\n';
-  if (mode) {
+  if (isECB(ciphertext)) {
     std::cout << "Detected: ECB" << '\n';
   } else {
     std::cout << "Detected: CBC" << '\n';
