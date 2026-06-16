@@ -115,8 +115,11 @@ int getECBScore(std::span<const uint8_t> buffer) {
   return repeatedBlocks;
 }
 
-std::string detectCBCorECB(std::span<const uint8_t> ciphertext) {
-  return getECBScore(ciphertext) > 0 ? "ECB" : "CBC";
+bool isECB(std::span<const uint8_t> ciphertext) {
+  if (getECBScore(ciphertext) > 0) {
+    return true;
+  }
+  return false;
 }
 
 size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
@@ -134,3 +137,5 @@ size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
   }
   return paddedLen - len;
 }
+
+

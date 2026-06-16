@@ -21,6 +21,6 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
                                    size_t keySize);
 
 int getECBScore(std::span<const uint8_t> buffer);
-std::string detectCBCorECB(std::span<const uint8_t> ciphertext);
+bool isECB(std::span<const uint8_t> ciphertext);
 size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
                      std::span<const uint8_t> plaintext);
