@@ -41,6 +41,6 @@ int challenge2_12(int argc, char **argv) {
     }
     plaintext.push_back(*byte);
   }
-  std::cout << bytesToString(plaintext) << "\n";
+  std::cout << bytesToString(plaintext);
   return 0;
 }
