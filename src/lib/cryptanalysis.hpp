@@ -22,7 +22,7 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
 
 int getECBScore(std::span<const uint8_t> buffer);
 bool isECB(std::span<const uint8_t> ciphertext);
-size_t findBlockSize(ecbOracle oracle, std::span<const uint8_t> plaintext);
+size_t findBlockSize(ecbOracle oracle);
 std::optional<uint8_t> decryptByteAtIndex(ecbOracle oracle, size_t blockSize,
                                           size_t index,
                                           std::span<const uint8_t> firstBytes);
