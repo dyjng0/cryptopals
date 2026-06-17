@@ -1,7 +1,8 @@
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <span>
-#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -82,7 +83,7 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
 // Block cipher modes of operation
 // Hash functions for span
 struct SpanHash {
-  size_t operator()(std::span<const uint8_t, BLOCK_SIZE> bytes) const {
+  size_t operator()(std::span<const uint8_t> bytes) const {
     size_t hash = 0;
     std::hash<uint8_t> hasher;
     for (uint8_t byte : bytes) {
@@ -93,8 +94,8 @@ struct SpanHash {
 };
 
 struct SpanEqual {
-  bool operator()(std::span<const uint8_t, BLOCK_SIZE> a,
-                  std::span<const uint8_t, BLOCK_SIZE> b) const {
+  bool operator()(std::span<const uint8_t> a,
+                  std::span<const uint8_t> b) const {
     return std::equal(a.begin(), a.end(), b.begin());
   }
 };
@@ -122,20 +123,52 @@ bool isECB(std::span<const uint8_t> ciphertext) {
   return false;
 }
 
-size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
-                     std::span<const uint8_t> plaintext) {
+size_t findBlockSize(ecbOracle oracle, std::span<const uint8_t> plaintext) {
   std::vector<uint8_t> padding;
   padding.reserve(plaintext.size() + 32);
   padding.insert(padding.end(), plaintext.begin(), plaintext.end());
   size_t len = oracle(padding).size();
 
-  padding.push_back(padChar);
+  padding.push_back('A');
   size_t paddedLen = oracle(padding).size();
   while (len == paddedLen) {
-    padding.push_back(padChar);
+    padding.push_back('A');
     paddedLen = oracle(padding).size();
   }
   return paddedLen - len;
 }
 
+std::optional<uint8_t> decryptByteAtIndex(ecbOracle oracle, size_t blockSize,
+                                          int index,
+                                          std::span<const uint8_t> firstBytes) {
+  size_t blockIndex = index / blockSize;
+  size_t padSize = (blockSize - 1) - (index % blockSize);
+  std::vector<uint8_t> input(blockSize, 'A');
 
+  // True byte block
+  std::vector<uint8_t> ciphertext =
+      oracle(std::vector<uint8_t>(input.begin(), input.begin() + padSize));
+  std::span<const uint8_t> trueBlock =
+      std::span(ciphertext).subspan(blockSize * blockIndex, blockSize);
+
+  // Set first bytes of input vector
+  if (firstBytes.size() > padSize) {
+    std::copy(firstBytes.end() - padSize, firstBytes.end(), input.begin());
+  } else {
+    std::copy(firstBytes.begin(), firstBytes.end(),
+              input.begin() + (padSize - firstBytes.size()));
+  }
+
+  // Test all possible bytes
+  std::span<uint8_t> testBlock;
+  for (uint8_t i = 0; i <= 255; ++i) {
+    input[blockSize - 1] = i;
+    ciphertext = oracle(input);
+    testBlock = std::span(ciphertext).subspan(0, blockSize);
+    SpanEqual equals;
+    if (equals(testBlock, trueBlock)) {
+      return i;
+    }
+  }
+  return std::nullopt;
+}

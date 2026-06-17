@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <span>
-#include <string>
 #include <vector>
 
 struct MaxScoreResults {
@@ -22,5 +22,7 @@ std::vector<uint8_t> breakVigenere(std::span<const uint8_t> buffer,
 
 int getECBScore(std::span<const uint8_t> buffer);
 bool isECB(std::span<const uint8_t> ciphertext);
-size_t findBlockSize(ecbOracle oracle, uint8_t padChar,
-                     std::span<const uint8_t> plaintext);
+size_t findBlockSize(ecbOracle oracle, std::span<const uint8_t> plaintext);
+std::optional<uint8_t> decryptByteAtIndex(ecbOracle oracle, size_t blockSize,
+                                          size_t index,
+                                          std::span<const uint8_t> firstBytes);

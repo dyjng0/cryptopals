@@ -24,7 +24,7 @@ int challenge2_12(int argc, char **argv) {
     return 1;
   }
 
-  size_t blockSize = findBlockSize(ecbEncryptionOracle, 'A', *buffer);
+  size_t blockSize = findBlockSize(ecbEncryptionOracle, *buffer);
   std::vector<uint8_t> testInput(2 * blockSize, 'A');
   std::vector<uint8_t> ciphertext = ecbEncryptionOracle(testInput);
   if (!isECB(ciphertext)) {
