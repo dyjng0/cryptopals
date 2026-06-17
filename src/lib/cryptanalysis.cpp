@@ -124,15 +124,27 @@ bool isECB(std::span<const uint8_t> ciphertext) {
 }
 
 size_t findBlockSize(ecbOracle oracle) {
-  std::vector<uint8_t> padding(32);
-  size_t len = oracle(padding).size();
-  padding.push_back('A');
-  size_t paddedLen = oracle(padding).size();
+  size_t len = oracle({}).size();
+  std::vector<uint8_t> input;
+  input.push_back('A');
+  size_t paddedLen = oracle(input).size();
   while (len == paddedLen) {
-    padding.push_back('A');
-    paddedLen = oracle(padding).size();
+    input.push_back('A');
+    paddedLen = oracle(input).size();
   }
   return paddedLen - len;
+}
+
+size_t findPlaintextSize(ecbOracle oracle) {
+  size_t len = oracle({}).size();
+  std::vector<uint8_t> input;
+  input.push_back('A');
+  size_t paddedLen = oracle(input).size();
+  while (len == paddedLen) {
+    input.push_back('A');
+    paddedLen = oracle(input).size();
+  }
+  return len - input.size();
 }
 
 std::optional<uint8_t> decryptByteAtIndex(ecbOracle oracle, size_t blockSize,
@@ -144,17 +156,17 @@ std::optional<uint8_t> decryptByteAtIndex(ecbOracle oracle, size_t blockSize,
 
   // True byte block
   std::vector<uint8_t> ciphertext =
-    oracle(std::vector<uint8_t>(input.begin(), input.begin() + padSize));
-std::vector<uint8_t> trueBlock(
-    ciphertext.begin() + blockSize * blockIndex,
-    ciphertext.begin() + blockSize * blockIndex + blockSize);
+      oracle(std::vector<uint8_t>(input.begin(), input.begin() + padSize));
+  std::vector<uint8_t> trueBlock(ciphertext.begin() + blockSize * blockIndex,
+                                 ciphertext.begin() + blockSize * blockIndex +
+                                     blockSize);
 
   // Set first bytes of input vector
-  if (firstBytes.size() > padSize) {
-    std::copy(firstBytes.end() - padSize, firstBytes.end(), input.begin());
+  if (firstBytes.size() > blockSize - 1) {
+    std::copy(firstBytes.end() - (blockSize - 1), firstBytes.end(), input.begin());
   } else {
     std::copy(firstBytes.begin(), firstBytes.end(),
-              input.begin() + (padSize - firstBytes.size()));
+              input.begin() + (blockSize - 1 - firstBytes.size()));
   }
 
   // Test all possible bytes
