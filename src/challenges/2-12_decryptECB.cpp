@@ -16,6 +16,7 @@ int challenge2_12(int argc, char **argv) {
     }
     std::vector<uint8_t> ciphertext = ecbEncryptionOracle(*buffer);
     std::cout << "Ciphertext: " << bytesToHex(ciphertext) << '\n';
+    return 0;
   }
   if (argc > 2) {
     std::cerr << "Usage ./cryptopals 2-12 OR ./cryptopals 2-12 <base64>\n";
