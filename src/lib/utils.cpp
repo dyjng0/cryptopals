@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <sstream>
+#include <string>
 #include <sys/random.h>
+#include <unordered_map>
 #include <vector>
 
 #include "src/lib/utils.hpp"
@@ -51,4 +54,19 @@ std::vector<uint8_t> generateBytes(size_t n) {
   std::vector<uint8_t> bytes(n);
   getrandom(bytes.data(), n, 0);
   return bytes;
+}
+
+// Parsing
+std::unordered_map<std::string, std::string> parseKV(const std::string input) {
+  std::unordered_map<std::string, std::string> result;
+  std::stringstream ss(input);
+
+  std::string token;
+  while (getline(ss, token, '&')) {
+    size_t i = token.find('=');
+    if (i != std::string::npos) {
+      result[token.substr(0, i)] = token.substr(i + 1);
+    }
+  }
+  return result;
 }

@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 // XOR
@@ -16,3 +18,6 @@ std::optional<int> findHammingDist(std::span<const uint8_t> buffer1,
 
 // random bytes
 std::vector<uint8_t> generateBytes(size_t n);
+
+// Parsing
+std::unordered_map<std::string, std::string> parseKV(const std::string input);
